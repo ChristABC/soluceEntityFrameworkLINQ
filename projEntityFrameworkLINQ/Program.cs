@@ -1,28 +1,31 @@
 ﻿using System;
-using static projEntityFrameworkLINQ.Model;
+using static projEntityFrameworkLINQ.WildlifeContext;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using projEntityFrameworkLINQ;
 
 namespace LinqMethod
 {
 
-    public class MainProgram
+    class MainProgram
     {
-        public static int RemainingCount { get; private set; }
-
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
-
-            using (var context = new AnimalContext())
+            using (var context = new WildlifeContext())
             {
-                var whiteCougarsCount = context.Animals.Count(animal => animal.Species.Name == "Cougars blancs");
-                var whiteTigersCount = context.Animals.Count(animal => animal.Species.Name == "Tigres blancs");
-                var albinoTurtlesCount = context.Animals.Count(animal => animal.Species.Name == "Tortues albinos");
+                DataInitializer.Initialize(context);
 
-                Console.WriteLine("Nombre d'animaux recensés :");
-                Console.WriteLine($"Cougars blancs : {whiteCougarsCount}");
-                Console.WriteLine($"Tigres blancs : {whiteTigersCount}");
-                Console.WriteLine($"Tortues albinos : {albinoTurtlesCount}");
+                var speciesList = context.Species
+                    .Include(s => s.Animals)
+                    .ToList();
+
+                foreach (var species in speciesList)
+                {
+                    Console.WriteLine($"{species.Name} - {species.Animals.Count} animaux recensés");
+                }
             }
         }
     }
 }
+
+
